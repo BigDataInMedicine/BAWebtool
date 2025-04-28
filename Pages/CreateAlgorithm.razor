@@ -39,7 +39,63 @@
         <ValidationMessage For="@(() => Algorithm.Category)" />
     </div>
 
-    <div class="form-group mb-4">
+    <div class="form-group">
+        <label for="yearSelect">Year of publication *</label>
+        <select id="yearSelect" class="form-control" @bind="SelectedYear">
+            @foreach (var year in Years)
+            {
+            <option value="@year">@year</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group mt-4">
+        <label>Method Approach:</label>
+        <div>
+            <input type="radio" id="dataDriven" name="methodApproach" value="data-driven"
+                   @onchange="OnMethodApproachChanged" checked="@("data-driven" == MethodApproach)" />
+            <label for="dataDriven" class="ms-1">Data-Driven</label>
+        </div>
+        <div>
+            <input type="radio" id="knowledgeBased" name="methodApproach" value="knowledge-based"
+                   @onchange="OnMethodApproachChanged" checked="@("knowledge-based" == MethodApproach)" />
+            <label for="knowledgeBased" class="ms-1">Knowledge-Based</label>
+        </div>
+        <div>
+            <input type="radio" id="naM" name="methodApproach" value="N/A"
+                   @onchange="OnMethodApproachChanged" checked="@("N/A" == MethodApproach)" />
+            <label for="naM" class="ms-1">N/A</label>
+        </div>
+    </div>
+
+    @if (MethodApproach == "knowledge-based")
+    {
+        <div class="form-group mt-4">
+            <label>Learning Type:</label>
+            <div>
+                <input type="radio" id="supervised" name="learningType" value="supervised"
+                       @onchange="OnLearningTypeChanged" checked="@("supervised" == LearningType)" />
+                <label for="supervised" class="ms-1">Supervised</label>
+            </div>
+            <div>
+                <input type="radio" id="unsupervised" name="learningType" value="unsupervised"
+                       @onchange="OnLearningTypeChanged" checked="@("unsupervised" == LearningType)" />
+                <label for="unsupervised" class="ms-1">Unsupervised</label>
+            </div>
+            <div>
+                <input type="radio" id="semiSupervised" name="learningType" value="semi-supervised"
+                       @onchange="OnLearningTypeChanged" checked="@("semi-supervised" == LearningType)" />
+                <label for="semiSupervised" class="ms-1">Semi-Supervised</label>
+            </div>
+            <div>
+                <input type="radio" id="naL" name="learningType" value="N/A"
+                       @onchange="OnLearningTypeChanged" checked="@("N/A" == LearningType)" />
+                <label for="naL" class="ms-1">N/A</label>
+            </div>
+        </div>
+    }
+
+    <div class="form-group mt-5">
         <label>Upload Image</label>
         <InputFile OnChange="HandleImageUpload" />
         @if (!string.IsNullOrEmpty(PreviewImageUrl))
@@ -135,6 +191,11 @@
     private string? PreviewImageUrl;
     private string NewConstraint = string.Empty;
     private string NewDerivation = string.Empty;
+    private int SelectedYear { get; set; } = DateTime.Now.Year;
+    private string MethodApproach { get; set; } = "N/A";
+    private string LearningType { get; set; } = "N/A";
+
+    private IEnumerable<int> Years => Enumerable.Range(1900, DateTime.Now.Year - 1900 + 1).Reverse();
 
     protected override async Task OnInitializedAsync()
     {
@@ -164,8 +225,8 @@
         await using var fs = new FileStream(path, FileMode.Create);
         await UploadedFile.OpenReadStream().CopyToAsync(fs);
 
-        Algorithm.ImageUrl = $"/uploads/{fileName}";
-        PreviewImageUrl = Algorithm.ImageUrl;
+        Algorithm.ModelUrl = $"/uploads/{fileName}";
+        PreviewImageUrl = Algorithm.ModelUrl;
     }
 
     private async Task HandleValidSubmit()
@@ -197,6 +258,20 @@
 
             NewDerivation = string.Empty;
         }
+    }
+    
+    private void OnMethodApproachChanged(ChangeEventArgs e)
+    {
+        MethodApproach = e.Value?.ToString() ?? "n.a.";
+        if (MethodApproach != "knowledge-based")
+        {
+            LearningType = "n.a.";
+        }
+    }
+
+    private void OnLearningTypeChanged(ChangeEventArgs e)
+    {
+        LearningType = e.Value?.ToString() ?? "n.a.";
     }
 
 }

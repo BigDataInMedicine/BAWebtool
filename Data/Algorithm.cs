@@ -19,7 +19,18 @@ public class Algorithm
     [Required]
     public string Author { get; set; } = default!;
     
-    public string? ImageUrl { get; set; } 
+    [Required] 
+    public int Year; 
+    
+    [Required] 
+    public string  DisplayDescription;
+    
+    [Required] 
+    public string MethodApproach; //(data-driven or knowledge-based)
+    
+    public string LearningType; //(if it's data-driven)
+    
+    public string? ModelUrl { get; set; } 
     
     public ICollection<string> Constraints { get; set; } = new List<string>();
     

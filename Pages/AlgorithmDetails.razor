@@ -6,27 +6,6 @@
 
 @* ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract *@
 
-@*@if (algorithm is null)
-{
-    <p>Load algorithm ...</p>
-}
-else
-{
-    <h2>@algorithm.AlgorithmName</h2>
-    <p>Author: @algorithm.Author</p>
-    <p>Category: @algorithm.Category.GetDisplayName()</p>
-
-    <h3>Data points:</h3>
-    <ul>
-
-        @foreach (var dp in algorithm.DataPoints)
-        {
-            <li>@dp.DataPointName (@dp.DataPointDescription)</li>
-        }
-
-    </ul>
-} *@
-
 @if (algorithm is null)
     {
     <p>Load algorithm ...</p>
@@ -36,6 +15,7 @@ else
     <h2>@algorithm.AlgorithmName</h2>
     <p>Author: @algorithm.Author</p>
     <p>Category: @algorithm.Category.GetDisplayName()</p>
+    <p>Year: @algorithm.Year</p>
 
     <h3>Data points:</h3>
     <ul>
@@ -45,10 +25,10 @@ else
         }
     </ul>
     
-    @if (!string.IsNullOrEmpty(algorithm.ImageUrl))
+    @if (!string.IsNullOrEmpty(algorithm.ModelUrl))
     {
         <h3>Visual Representation:</h3>
-        <img src="@algorithm.ImageUrl" alt="Algorithm Image" style="max-width: 100%; height: auto;" />
+        <img src="@algorithm.ModelUrl" alt="Algorithm Image" style="max-width: 100%; height: auto;" />
     }
     
     @if (algorithm.Constraints != null && algorithm.Constraints.Any())
@@ -78,7 +58,7 @@ else
 
 
 @code {
-    [Parameter] public string category { get; set; } 
+    [Parameter] public string category { get; set; }
 
     [Parameter] public Guid id { get; set; }
 

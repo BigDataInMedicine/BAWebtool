@@ -60,7 +60,7 @@ namespace BaWebtool2.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ModelUrl")
                         .HasColumnType("TEXT");
 
                     b.HasKey("AlgorithmId");

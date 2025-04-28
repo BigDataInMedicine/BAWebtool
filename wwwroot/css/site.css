@@ -98,21 +98,14 @@ a, .btn-link {
     transition: transform 0.15s ease-in-out;
     display: flex;
     flex-direction: column;
+    text-align: center;
 }
 
 .algorithm-cards > li:hover {
     transform: scale(1.02);
 }
 
-.card-image {
-    width: 100%;
-    height: 180px;
-    background-size: cover;
-    background-position: center;
-}
-
 .algorithm-info {
-    padding: 1rem;
     background-color: #f9f9f9;
     text-align: center;
 }
