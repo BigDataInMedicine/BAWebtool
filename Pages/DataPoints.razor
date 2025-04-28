@@ -1,0 +1,66 @@
+@page "/datapoints"
+@using BaWebtool2.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JS
+
+<h3>Alle DataPoints</h3>
+
+<NavLink class="btn btn-primary" href="/createDataPoint">Creating new datapoint</NavLink>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var dp in AllDataPoints.OrderBy(dp => dp.DataPointName))
+    {
+    <tr>
+        <td>@dp.DataPointName</td>
+        <td>@dp.DataPointDescription</td>
+        <td>
+            <button class="btn btn-sm btn-danger"
+                    @onclick="() => AskDelete(dp.DataPointId)">
+                Delete
+            </button>
+        </td>
+    </tr>
+    }
+    </tbody>
+</table>
+
+
+@code {
+    private List<DataPoint> AllDataPoints = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllDataPoints = await DbContext.DataPoints.ToListAsync();
+    }
+
+    private async Task AskDelete(Guid id)
+    {
+        // Bestätigungsdialog per JavaScript
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Eintrag wirklich löschen?");
+        if (confirmed)
+            await Delete(id);
+    }
+
+    private async Task Delete(Guid id)
+    {
+        var dp = await DbContext.DataPoints.FindAsync(id);
+        if (dp != null)
+        {
+            DbContext.DataPoints.Remove(dp);
+            await DbContext.SaveChangesAsync();
+
+            // Sofort aus der UI-Liste nehmen, damit es verschwindet
+            AllDataPoints.RemoveAll(x => x.DataPointId == id);
+            StateHasChanged();
+        }
+    }
+}

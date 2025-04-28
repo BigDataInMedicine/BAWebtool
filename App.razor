@@ -1,0 +1,12 @@
+﻿@inject NavigationManager Navigation
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            Navigation.NavigateTo("/index");
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

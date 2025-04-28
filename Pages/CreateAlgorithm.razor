@@ -1,0 +1,202 @@
+@page "/createAlgorithm"
+@using BaWebtool2.Data
+@using Microsoft.EntityFrameworkCore
+@inject NavigationManager Nav
+@inject ApplicationDbContext DbContext
+
+<EditForm Model="@Algorithm" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group mb-4">
+        <label>Algorithm Name *</label>
+        <InputText class="form-control" @bind-Value="Algorithm.AlgorithmName" />
+        <ValidationMessage For="@(() => Algorithm.AlgorithmName)" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Author *</label>
+        <InputText class="form-control" @bind-Value="Algorithm.Author" />
+        <ValidationMessage For="@(() => Algorithm.Author)" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Description</label>
+        <InputTextArea class="form-control" @bind-Value="Algorithm.AlgorithmDescription" rows="3" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Category *</label>
+        <InputSelect class="form-control" @bind-Value="Algorithm.Category">
+            <option value="">-- select --</option>
+            @foreach (var cat in Enum.GetValues<Algorithm.AlgorithmCategory>())
+            {
+                if (cat is not Algorithm.AlgorithmCategory.AllCategories)
+                {
+                    <option value="@cat">@cat.GetDisplayName()</option>
+                }
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Algorithm.Category)" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Upload Image</label>
+        <InputFile OnChange="HandleImageUpload" />
+        @if (!string.IsNullOrEmpty(PreviewImageUrl))
+        {
+            <div class="mt-2">
+                <img src="@PreviewImageUrl" style="max-height: 150px;" />
+            </div>
+        }
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Constraints</label>
+
+        <div class="input-group mb-2">
+            <InputText class="form-control" @bind-Value="NewConstraint" placeholder="Enter constraint..." />
+            <button type="button" class="btn btn-outline-secondary" @onclick="AddConstraint">Add</button>
+        </div>
+
+        @if (Algorithm.Constraints.Any())
+        {
+            <ul class="list-group">
+                @foreach (var constraint in Algorithm.Constraints)
+                {
+                    <li class="list-group-item">@constraint</li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Derivations</label>
+
+        <div class="input-group mb-2">
+            <InputText class="form-control" @bind-Value="NewDerivation" placeholder="Enter derivation..." />
+            <button type="button" class="btn btn-outline-secondary" @onclick="AddDerivation">Add</button>
+        </div>
+
+        @if (Algorithm.Derivations.Any())
+        {
+        <ul class="list-group">
+            @foreach (var derivation in Algorithm.Derivations)
+            {
+                <li class="list-group-item">@derivation</li>
+            }
+        </ul>
+        }
+    </div>
+    
+    
+    <div class="form-group mb-4">
+        <label class="form-label fs-5 mb-3">Related DataPoints</label>
+        
+        @if (AvailableDataPoints is not null)
+        {
+            var grouped = AvailableDataPoints
+            .GroupBy(dp => dp.Category) // oder dp.Category
+            .OrderBy(g => g.Key); // alphabetisch sortieren z. B.
+
+            <div class="row">
+                @foreach (var group in grouped)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4"> <!-- Zwei- bis Dreispaltig -->
+                        <h6 class="fw-bold">@group.Key</h6>
+                        @foreach (var dp in group)
+                        {
+                            <div class="form-check">
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       id="dp_@dp.DataPointId"
+                                       @onchange="e => ToggleDataPoint(dp, bool.TryParse(e?.Value?.ToString(), out var b) && b)" />
+                                <label class="form-check-label" for="dp_@dp.DataPointId">
+                                    @dp.DataPointName
+                                </label>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary px-4">Submit</button>
+    </div>
+    
+</EditForm>
+
+@code {
+    private Algorithm Algorithm { get; set; } = new();
+    private List<DataPoint> AvailableDataPoints { get; set; } = [];
+    private List<DataPoint> SelectedDataPoints { get; set; } = [];
+    private IBrowserFile? UploadedFile;
+    private string? PreviewImageUrl;
+    private string NewConstraint = string.Empty;
+    private string NewDerivation = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AvailableDataPoints = await DbContext.DataPoints.ToListAsync();
+    }
+
+    private void ToggleDataPoint(DataPoint dp, bool selected)
+    {
+        if (selected)
+        {
+            if (!SelectedDataPoints.Contains(dp))
+                SelectedDataPoints.Add(dp);
+        }
+        else
+        {
+            SelectedDataPoints.Remove(dp);
+        }
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        UploadedFile = e.File;
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(UploadedFile.Name)}";
+        var path = Path.Combine("wwwroot/uploads", fileName);
+
+        Directory.CreateDirectory("wwwroot/uploads");
+        await using var fs = new FileStream(path, FileMode.Create);
+        await UploadedFile.OpenReadStream().CopyToAsync(fs);
+
+        Algorithm.ImageUrl = $"/uploads/{fileName}";
+        PreviewImageUrl = Algorithm.ImageUrl;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Algorithm.AlgorithmId = Guid.NewGuid();
+        Algorithm.DataPoints = SelectedDataPoints;
+
+        DbContext.Algorithms.Add(Algorithm);
+        await DbContext.SaveChangesAsync();
+
+        Nav.NavigateTo("/");
+    }
+
+    private void AddConstraint()
+    {
+        if (!string.IsNullOrWhiteSpace(NewConstraint))
+        {
+            Algorithm.Constraints.Add(NewConstraint);
+
+            NewConstraint = string.Empty;
+        }
+    }
+    
+    private void AddDerivation()
+    {
+        if (!string.IsNullOrWhiteSpace(NewDerivation))
+        {
+            Algorithm.Derivations.Add(NewDerivation);
+
+            NewDerivation = string.Empty;
+        }
+    }
+
+}

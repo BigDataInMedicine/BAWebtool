@@ -1,0 +1,111 @@
+@page "/category/{category}/{id:guid}"
+@using BaWebtool2.Data
+@using Microsoft.EntityFrameworkCore
+@inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
+
+@* ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract *@
+
+@*@if (algorithm is null)
+{
+    <p>Load algorithm ...</p>
+}
+else
+{
+    <h2>@algorithm.AlgorithmName</h2>
+    <p>Author: @algorithm.Author</p>
+    <p>Category: @algorithm.Category.GetDisplayName()</p>
+
+    <h3>Data points:</h3>
+    <ul>
+
+        @foreach (var dp in algorithm.DataPoints)
+        {
+            <li>@dp.DataPointName (@dp.DataPointDescription)</li>
+        }
+
+    </ul>
+} *@
+
+@if (algorithm is null)
+    {
+    <p>Load algorithm ...</p>
+    }
+else
+{
+    <h2>@algorithm.AlgorithmName</h2>
+    <p>Author: @algorithm.Author</p>
+    <p>Category: @algorithm.Category.GetDisplayName()</p>
+
+    <h3>Data points:</h3>
+    <ul>
+        @foreach (var dp in algorithm.DataPoints)
+        {
+            <li>@dp.DataPointName (@dp.DataPointDescription)</li>
+        }
+    </ul>
+    
+    @if (!string.IsNullOrEmpty(algorithm.ImageUrl))
+    {
+        <h3>Visual Representation:</h3>
+        <img src="@algorithm.ImageUrl" alt="Algorithm Image" style="max-width: 100%; height: auto;" />
+    }
+    
+    @if (algorithm.Constraints != null && algorithm.Constraints.Any())
+    {
+        <h3>Constraints:</h3>
+        <ul>
+            @foreach (var constraint in algorithm.Constraints)
+            {
+                <li>@constraint</li>
+            }
+        </ul>
+    }
+
+    @if (algorithm.Derivations != null && algorithm.Derivations.Any())
+    {
+        <h3>Derivations:</h3>
+        <ul>
+            @foreach (var derivation in algorithm.Derivations)
+            {
+                <li>@derivation</li>
+            }
+        </ul>
+    }
+    
+}
+
+
+
+@code {
+    [Parameter] public string category { get; set; } 
+
+    [Parameter] public Guid id { get; set; }
+
+    private Algorithm algorithm;
+
+    private Algorithm.AlgorithmCategory? parsedCategory;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine($"Kategorie: {category}, ID: {id}");
+
+        // Try to parse string to enum
+        if (Enum.TryParse<Algorithm.AlgorithmCategory>(
+                category,
+                ignoreCase: true,
+                out var parsed))
+        {
+            parsedCategory = parsed;
+
+            algorithm = await DbContext.Algorithms
+                .Include(a => a.DataPoints)
+                .FirstAsync(a => a.AlgorithmId == id && a.Category == parsedCategory);
+        }
+        else
+        {
+            Console.WriteLine("Kategorie konnte nicht geparst werden.");
+        }
+    }
+
+}

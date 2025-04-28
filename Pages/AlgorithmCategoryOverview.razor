@@ -1,0 +1,36 @@
+@page "/category/{category}"
+@using BaWebtool2.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+
+
+<h3>@_selectedAlgorithmCategory.GetTitle()</h3>
+
+<p>Here is a description of the category ... </p>
+
+<AlgorithmGrid AlgorithmCategory="@_selectedAlgorithmCategory" />
+
+@code {
+    [Parameter]
+    public string? category { get; set; }
+    
+    public Algorithm.AlgorithmCategory _selectedAlgorithmCategory;
+    
+    
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(category) &&
+            Enum.TryParse<Algorithm.AlgorithmCategory>(category, ignoreCase: true, out var parsedCategory))
+        {
+            _selectedAlgorithmCategory = parsedCategory;
+        }
+        else
+        {
+            _selectedAlgorithmCategory = Algorithm.AlgorithmCategory.AllCategories;
+        }
+    }
+
+}

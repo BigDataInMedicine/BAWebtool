@@ -1,0 +1,110 @@
+@using System.Runtime.InteropServices.JavaScript
+@using BaWebtool2.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+
+@* Reusable component to show the algortihms per category in a grid. With hover element *@
+
+<div class="main">
+    <ul class="algorithm-cards">
+        @if (selectedAlgorithms == null)
+        {
+            <p>Load data...</p>
+        }
+        else if (!selectedAlgorithms.Any())
+        {
+            <p>No algorithms to this topic found.</p>
+        }
+        else
+        {
+            @foreach (var al in selectedAlgorithms)
+            {
+                <li class="card"
+                    @onclick="@(() => NavigateToDetails(al))"
+                    @onmouseover="@((e) => ShowTooltip(al, e))"
+                    @onmouseout="@((e) => HideTooltip())">
+                    
+                    <div class="card-image" style="background-image: url('@al.ImageUrl')"></div>
+                    <div class="algorithm-info"></div>
+                    <span class="title"> @al.AlgorithmName - @al.Author</span>
+                </li>
+            }
+            
+            @if (hoveredAlgorithm is not null)
+            {
+                <div class="bg-white border rounded-2xl shadow-xl p-4 backdrop-blur-sm text-sm w-64 transition-all z-50"
+                     style="@tooltipStyle">
+                    <h4 class="font-bold mb-2">@hoveredAlgorithm.AlgorithmName</h4>
+                    <p class="text-gray-600">@hoveredAlgorithm.AlgorithmDescription</p>
+                </div>
+            }
+        }
+    </ul>
+</div> 
+
+@code {
+
+    public List<Algorithm> selectedAlgorithms { get; set; }
+    private Algorithm? hoveredAlgorithm;
+    private string? tooltipStyle = null;
+
+    [Parameter] public Algorithm.AlgorithmCategory AlgorithmCategory { get; set; }
+    [Parameter] public List<Guid> SelectedDataPointIds { get; set; } = new();
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        selectedAlgorithms = await DbContext.Algorithms.ToListAsync();
+    } 
+    
+    private void ShowTooltip(Algorithm algorithm, MouseEventArgs e)
+    {
+        hoveredAlgorithm = algorithm;
+        tooltipStyle = $"position:absolute; left:{e.ClientX + 10}px; top:{e.ClientY + 10}px;";
+    }
+
+    private void HideTooltip()
+    {
+        hoveredAlgorithm = null;
+    }
+    
+    void NavigateToDetails(Algorithm algorithm)
+    {
+        var safeCategory = algorithm.Category.ToString().ToLower(); // falls Leerzeichen oder Sonderzeichen
+        Navigation.NavigateTo($"/category/{safeCategory}/{algorithm.AlgorithmId}");
+    }
+    
+    // For selecting the parameters
+    protected override async Task OnParametersSetAsync()
+    {
+        var query = DbContext.Algorithms
+            .Include(al => al.DataPoints)
+            .AsQueryable();
+
+        if (AlgorithmCategory != Algorithm.AlgorithmCategory.AllCategories)
+        {
+            query = query.Where(al => al.Category == AlgorithmCategory);
+        }
+
+        var allAlgorithms = await query.ToListAsync();
+        
+        
+        if (SelectedDataPointIds != null && SelectedDataPointIds.Any())
+        {
+            selectedAlgorithms = allAlgorithms
+                .Where(al =>
+                    al.DataPoints.All(dp => SelectedDataPointIds.Contains(dp.DataPointId)))
+                .ToList();
+        }
+        else
+        {
+            selectedAlgorithms = allAlgorithms;
+        } 
+        
+        
+        
+    }
+
+    
+}

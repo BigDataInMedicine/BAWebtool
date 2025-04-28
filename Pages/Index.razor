@@ -1,0 +1,138 @@
+﻿@page "/"
+@using BaWebtool2.Data
+@using Blazored.SessionStorage
+@using Microsoft.EntityFrameworkCore
+@inject ISessionStorageService SessionStorage
+@inject ApplicationDbContext DbContext
+
+
+<!-- Kategorieauswahl -->
+<select @bind="_selectedAlgorithmCategory" @bind:after="SaveCategory" class="form-select mb-3">
+    @foreach (var category in Enum.GetValues<Algorithm.AlgorithmCategory>())
+    {
+        <option value="@category">@category.GetDisplayName()</option>
+    }
+</select>
+
+<!-- Datenpunkt-Filter (ausklappbar) -->
+<div class="mb-4">
+    <strong @onclick="ToggleFilter" style="cursor: pointer;">
+        <span>@(showDataPointFilter ? "▼" : "▶")</span>
+        Select your existing data:
+    </strong>
+
+    @if (showDataPointFilter)
+    {
+        <div class="flex gap-3 my-2">
+            <button style="background-color: #4b5563; color: white;" class="px-3 py-1 rounded hover:brightness-110"
+                    @onclick="SelectAllDataPoints">Select all</button>
+            <button style="background-color: #4b5563; color: white;" class="px-3 py-1 rounded hover:brightness-110"
+                    @onclick="DeselectAllDataPoints">Deselect all</button>
+        </div>
+
+        @if (allDataPoints is not null)
+        {
+            var groupedDataPoints = allDataPoints
+            .GroupBy(dp => dp.Category)
+            .OrderBy(g => g.Key);
+
+            <div class="row">
+                @foreach (var group in groupedDataPoints)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <h6 class="fw-bold">@group.Key</h6>
+                        @foreach (var dp in group)
+                        {
+                        <div class="form-check">
+                            <input type="checkbox"
+                                   id="@dp.DataPointId"
+                                   class="form-check-input"
+                                   @bind="selectedDataPointIds[dp.DataPointId]" />
+                            <label class="form-check-label" for="@dp.DataPointId">@dp.DataPointName</label>
+                        </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+
+<!-- Algorithmen anzeigen -->
+<AlgorithmGrid AlgorithmCategory="@_selectedAlgorithmCategory"
+               SelectedDataPointIds="@selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList()" />
+
+<NavLink class="btn btn-primary" href="/createAlgorithm">Creating new algorithm</NavLink>
+
+@code {
+    private Algorithm.AlgorithmCategory _selectedAlgorithmCategory = Algorithm.AlgorithmCategory.AllCategories;
+    
+    private List<DataPoint> allDataPoints = new();
+    private Dictionary<Guid, bool> selectedDataPointIds = new(); // Guid -> IsSelected
+    
+    private bool showDataPointFilter = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        allDataPoints = await DbContext.DataPoints.ToListAsync();
+
+        // Standard: alle ausgewählt
+        foreach (var dp in allDataPoints)
+        {
+            selectedDataPointIds[dp.DataPointId] = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var storedCategory = await SessionStorage.GetItemAsync<string>("selectedCategory");
+
+            if (!string.IsNullOrEmpty(storedCategory) && Enum.TryParse(storedCategory, out Algorithm.AlgorithmCategory parsedCategory))
+            {
+                _selectedAlgorithmCategory = parsedCategory;
+                StateHasChanged(); // UI nach dem Laden der Daten aktualisieren
+            }
+        }
+    }
+    
+    private async Task SaveCategory()
+    {
+        await SessionStorage.SetItemAsync("selectedCategory", _selectedAlgorithmCategory.ToString());
+    }
+    
+    private Task SelectAllDataPoints()
+    {
+        foreach (var key in selectedDataPointIds.Keys.ToList())
+        {
+            selectedDataPointIds[key] = true;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task DeselectAllDataPoints()
+    {
+        foreach (var key in selectedDataPointIds.Keys.ToList())
+        {
+            selectedDataPointIds[key] = false;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task FilterChanged(ChangeEventArgs e)
+    {
+        StateHasChanged(); // neu rendern, damit AlgorithmGrid aktualisiert wird
+        return Task.CompletedTask;
+    }
+    
+    private void ToggleFilter()
+    {
+        showDataPointFilter = !showDataPointFilter;
+    }
+    
+
+}
