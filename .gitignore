@@ -5,3 +5,6 @@ obj/
 .vs/
 *.db
 *.sqlite
+*.db-shm
+*.db-wal
+.gitignore

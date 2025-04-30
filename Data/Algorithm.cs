@@ -20,15 +20,15 @@ public class Algorithm
     public string Author { get; set; } = default!;
     
     [Required] 
-    public int Year; 
+    public int Year { get; set; } //Year of publication 
     
     [Required] 
-    public string  DisplayDescription;
+    public string  DisplayDescription { get; set; }
     
     [Required] 
-    public string MethodApproach; //(data-driven or knowledge-based)
+    public string MethodApproach { get; set; } //(data-driven or knowledge-based)
     
-    public string LearningType; //(if it's data-driven)
+    public string LearningType { get; set; } //(if it's data-driven)
     
     public string? ModelUrl { get; set; } 
     

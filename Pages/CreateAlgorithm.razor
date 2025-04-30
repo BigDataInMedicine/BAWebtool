@@ -39,16 +39,19 @@
         <ValidationMessage For="@(() => Algorithm.Category)" />
     </div>
 
-    <div class="form-group">
-        <label for="yearSelect">Year of publication *</label>
-        <select id="yearSelect" class="form-control" @bind="SelectedYear">
+    <div class="form-group mb-4">
+        <label>Year of publication *</label>
+        <InputSelect class="form-control" @bind-Value="Algorithm.Year">
+            <option value="">-- select --</option>
             @foreach (var year in Years)
             {
-            <option value="@year">@year</option>
+                <option value="@year">@year</option>
             }
-        </select>
+        </InputSelect>
+        <ValidationMessage For="@(() => Algorithm.Year)" />
     </div>
 
+    
     <div class="form-group mt-4">
         <label>Method Approach:</label>
         <div>

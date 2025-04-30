@@ -60,8 +60,23 @@ namespace BaWebtool2.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DisplayDescription")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LearningType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MethodApproach")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ModelUrl")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("AlgorithmId");
 
