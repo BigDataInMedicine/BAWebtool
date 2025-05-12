@@ -11,7 +11,7 @@
 
 <p>Here is a description of the category ... </p>
 
-<AlgorithmGrid AlgorithmCategory="@_selectedAlgorithmCategory" />
+<AlgorithmGrid Algorithms="selectedAlgorithms" />
 
 @code {
     [Parameter]
@@ -19,6 +19,17 @@
     
     public Algorithm.AlgorithmCategory _selectedAlgorithmCategory;
     
+    private List<Algorithm> allAlgorithms = new();
+    private List<Algorithm> selectedAlgorithms = new();
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        allAlgorithms = await DbContext.Algorithms
+            .Include(al => al.DataPoints)
+            .ToListAsync();
+        
+    }
     
     protected override void OnParametersSet()
     {
@@ -31,6 +42,8 @@
         {
             _selectedAlgorithmCategory = Algorithm.AlgorithmCategory.AllCategories;
         }
+        
+        selectedAlgorithms = allAlgorithms.Where(al => al.Category == _selectedAlgorithmCategory).ToList();
     }
 
 }
