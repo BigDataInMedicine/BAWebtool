@@ -14,6 +14,19 @@
     }
 </select>
 
+<!-- Jahrauswahl -->
+<div class="mb-4">
+    <label for="yearMin" class="form-label">Select year range:</label>
+    <div class="d-flex align-items-center gap-3">
+        <input type="range" id="yearMin" min="2000" max="2025" step="1"
+               @bind="RangeValue[0]" @bind:event="onchange" />
+        <input type="range" id="yearMax" min="2000" max="2025" step="1"
+               @bind="RangeValue[1]" @bind:event="onchange" />
+        <span class="ms-2">@RangeValue[0] – @RangeValue[1]</span>
+    </div>
+</div>
+
+
 <!-- Datenpunkt-Filter (ausklappbar) -->
 <div class="mb-4">
     <strong @onclick="ToggleFilter" style="cursor: pointer;">
@@ -56,12 +69,13 @@
             </div>
         }
     }
-</div>
+</div> 
 
 
 <!-- Algorithmen anzeigen -->
 <AlgorithmGrid AlgorithmCategory="@_selectedAlgorithmCategory"
-               SelectedDataPointIds="@selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList()" />
+               SelectedDataPointIds="@selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList()"
+               YearRange="RangeValue"/>
 
 <NavLink class="btn btn-primary" href="/createAlgorithm">Creating new algorithm</NavLink>
 
@@ -72,6 +86,10 @@
     private Dictionary<Guid, bool> selectedDataPointIds = new(); // Guid -> IsSelected
     
     private bool showDataPointFilter = false;
+
+    public int[] RangeValue = { 2000, 2025 };
+    
+   
     
     protected override async Task OnInitializedAsync()
     {
@@ -123,11 +141,12 @@
         return Task.CompletedTask;
     }
 
-    private Task FilterChanged(ChangeEventArgs e)
+    private Task OnFilterChanged(ChangeEventArgs e)
     {
-        StateHasChanged(); // neu rendern, damit AlgorithmGrid aktualisiert wird
+        StateHasChanged(); // UI neu rendern (optional, falls externe Komponenten sich nicht neu rendern)
         return Task.CompletedTask;
     }
+
     
     private void ToggleFilter()
     {

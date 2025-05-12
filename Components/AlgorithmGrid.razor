@@ -50,6 +50,8 @@
 
     [Parameter] public Algorithm.AlgorithmCategory AlgorithmCategory { get; set; }
     [Parameter] public List<Guid> SelectedDataPointIds { get; set; } = new();
+
+    [Parameter] public int[] YearRange { get; set; } = { 2000, 2025 };
     
     
     protected override async Task OnInitializedAsync()
@@ -93,12 +95,15 @@
         {
             selectedAlgorithms = allAlgorithms
                 .Where(al =>
-                    al.DataPoints.All(dp => SelectedDataPointIds.Contains(dp.DataPointId)))
+                    al.DataPoints.All(dp => SelectedDataPointIds.Contains(dp.DataPointId)) 
+                    && (al.Year >= YearRange[0] && al.Year <= YearRange[1]))
                 .ToList();
         }
         else
         {
-            selectedAlgorithms = allAlgorithms;
+            selectedAlgorithms = allAlgorithms
+                .Where(al => al.Year >= YearRange[0] && al.Year <= YearRange[1])
+                .ToList();
         } 
         
         
