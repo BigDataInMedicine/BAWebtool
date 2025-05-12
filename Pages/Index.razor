@@ -5,6 +5,12 @@
 @inject ISessionStorageService SessionStorage
 @inject ApplicationDbContext DbContext
 
+<!-- Such-Funktion -->
+<input type="text" @bind="searchTerm" 
+       @oninput="FilterAlgorithms"
+       placeholder="Search for title or author..."
+       class="p-2 border rounded mb-4 w-full" />
+
 
 <!-- Kategorieauswahl -->
 <select @bind="_selectedAlgorithmCategory" @bind:after="SaveCategory" class="form-select mb-3">
@@ -19,10 +25,10 @@
     <label for="yearMin" class="form-label">Select year range:</label>
     <div class="d-flex align-items-center gap-3">
         <input type="range" id="yearMin" min="2000" max="2025" step="1"
-               @bind="RangeValue[0]" @bind:event="onchange" />
+               @bind="rangeValue[0]" @bind:event="onchange" />
         <input type="range" id="yearMax" min="2000" max="2025" step="1"
-               @bind="RangeValue[1]" @bind:event="onchange" />
-        <span class="ms-2">@RangeValue[0] – @RangeValue[1]</span>
+               @bind="rangeValue[1]" @bind:event="onchange" />
+        <span class="ms-2">@rangeValue[0] – @rangeValue[1]</span>
     </div>
 </div>
 
@@ -73,13 +79,25 @@
 
 
 <!-- Algorithmen anzeigen -->
-<AlgorithmGrid AlgorithmCategory="@_selectedAlgorithmCategory"
-               SelectedDataPointIds="@selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList()"
-               YearRange="RangeValue"/>
+<AlgorithmGrid Algorithms="selectedAlgorithms" />
+
 
 <NavLink class="btn btn-primary" href="/createAlgorithm">Creating new algorithm</NavLink>
 
 @code {
+    private string _searchTerm = "";
+    private string searchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            if (_searchTerm != value)
+            {
+                _searchTerm = value;
+                _ = ApplyFilter();
+            }
+        }
+    }
     private Algorithm.AlgorithmCategory _selectedAlgorithmCategory = Algorithm.AlgorithmCategory.AllCategories;
     
     private List<DataPoint> allDataPoints = new();
@@ -87,20 +105,65 @@
     
     private bool showDataPointFilter = false;
 
-    public int[] RangeValue = { 2000, 2025 };
+    public int[] rangeValue = { 2000, 2025 };
     
-   
+    private List<Algorithm> allAlgorithms = new();
+    private List<Algorithm> selectedAlgorithms = new();
+    
     
     protected override async Task OnInitializedAsync()
     {
         allDataPoints = await DbContext.DataPoints.ToListAsync();
 
-        // Standard: alle ausgewählt
         foreach (var dp in allDataPoints)
         {
             selectedDataPointIds[dp.DataPointId] = true;
         }
+
+        allAlgorithms = await DbContext.Algorithms
+            .Include(al => al.DataPoints)
+            .ToListAsync();
+
+        await ApplyFilter(); // initiale Filterung
     }
+    
+    private async Task FilterAlgorithms(ChangeEventArgs e)
+    {
+        searchTerm = e?.Value?.ToString() ?? string.Empty;
+        await ApplyFilter();
+    }
+
+    private Task ApplyFilter()
+    {
+        IEnumerable<Algorithm> filtered = allAlgorithms;
+
+        if (_selectedAlgorithmCategory != Algorithm.AlgorithmCategory.AllCategories)
+        {
+            filtered = filtered.Where(al => al.Category == _selectedAlgorithmCategory);
+        }
+
+        if (selectedDataPointIds != null && selectedDataPointIds.Values.Any(v => v))
+        {
+            var selectedIds = selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+            filtered = filtered.Where(al =>
+                al.DataPoints.All(dp => selectedIds.Contains(dp.DataPointId)));
+        }
+
+        filtered = filtered.Where(al => al.Year >= rangeValue[0] && al.Year <= rangeValue[1]);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filtered = filtered.Where(al =>
+                (!string.IsNullOrEmpty(al.AlgorithmName) && al.AlgorithmName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(al.Author) && al.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        selectedAlgorithms = filtered.ToList();
+        StateHasChanged(); // falls von einem Event aufgerufen
+        return Task.CompletedTask;
+    }
+
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -140,18 +203,10 @@
 
         return Task.CompletedTask;
     }
-
-    private Task OnFilterChanged(ChangeEventArgs e)
-    {
-        StateHasChanged(); // UI neu rendern (optional, falls externe Komponenten sich nicht neu rendern)
-        return Task.CompletedTask;
-    }
-
     
     private void ToggleFilter()
     {
         showDataPointFilter = !showDataPointFilter;
     }
     
-
 }

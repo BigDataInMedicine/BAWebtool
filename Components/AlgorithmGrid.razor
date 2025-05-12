@@ -18,15 +18,15 @@
         }
         else
         {
-            @foreach (var al in selectedAlgorithms)
+            @foreach (var al in Algorithms)
             {
                 <li class="card"
                     @onclick="@(() => NavigateToDetails(al))"
                     @onmouseover="@((e) => ShowTooltip(al, e))"
                     @onmouseout="@((e) => HideTooltip())">
-                    
+
                     <div class="algorithm-info"></div>
-                    <span class="title"> @al.AlgorithmName - @al.Author</span>
+                    <span class="title">@al.AlgorithmName - @al.Author</span>
                 </li>
             }
             
@@ -47,11 +47,9 @@
     public List<Algorithm> selectedAlgorithms { get; set; }
     private Algorithm? hoveredAlgorithm;
     private string? tooltipStyle = null;
-
-    [Parameter] public Algorithm.AlgorithmCategory AlgorithmCategory { get; set; }
-    [Parameter] public List<Guid> SelectedDataPointIds { get; set; } = new();
-
-    [Parameter] public int[] YearRange { get; set; } = { 2000, 2025 };
+    
+    
+    [Parameter] public List<Algorithm> Algorithms { get; set; }
     
     
     protected override async Task OnInitializedAsync()
@@ -76,39 +74,6 @@
         Navigation.NavigateTo($"/category/{safeCategory}/{algorithm.AlgorithmId}");
     }
     
-    // For selecting the parameters
-    protected override async Task OnParametersSetAsync()
-    {
-        var query = DbContext.Algorithms
-            .Include(al => al.DataPoints)
-            .AsQueryable();
-
-        if (AlgorithmCategory != Algorithm.AlgorithmCategory.AllCategories)
-        {
-            query = query.Where(al => al.Category == AlgorithmCategory);
-        }
-
-        var allAlgorithms = await query.ToListAsync();
-        
-        
-        if (SelectedDataPointIds != null && SelectedDataPointIds.Any())
-        {
-            selectedAlgorithms = allAlgorithms
-                .Where(al =>
-                    al.DataPoints.All(dp => SelectedDataPointIds.Contains(dp.DataPointId)) 
-                    && (al.Year >= YearRange[0] && al.Year <= YearRange[1]))
-                .ToList();
-        }
-        else
-        {
-            selectedAlgorithms = allAlgorithms
-                .Where(al => al.Year >= YearRange[0] && al.Year <= YearRange[1])
-                .ToList();
-        } 
-        
-        
-        
-    }
 
     
 }
