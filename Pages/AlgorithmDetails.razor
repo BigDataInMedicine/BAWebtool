@@ -25,6 +25,54 @@ else
         }
     </ul>
     
+    <button class="btn btn-primary" @onclick="OpenDataPointModal">Data points missing</button>
+
+    @if (showMissingDataPoints)
+    {
+        <div class="alert alert-warning mt-3">
+            <strong>Missing data points:</strong>
+            <ul>
+                @foreach (var dp in missingDataPoints)
+                {
+                    <li>@dp.DataPointName</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <!-- Modal -->
+    @if (showModal)
+    {
+        <div class="modal-backdrop fade show"></div>
+        <div class="modal fade show d-block" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select the data points you have: </h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        @foreach (var dp in algorithm.DataPoints)
+                        {
+                            <div class="form-check">
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       id="@dp.DataPointId"
+                                       @bind="selectedDataPointStates[dp.DataPointId]" />
+                                <label class="form-check-label" for="@dp.DataPointId">@dp.DataPointName</label>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <button class="btn btn-success" @onclick="CheckMissingDataPoints">Ready</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+    
     @if (!string.IsNullOrEmpty(algorithm.ModelUrl))
     {
         <h3>Visual Representation:</h3>
@@ -59,12 +107,14 @@ else
 
 @code {
     [Parameter] public string category { get; set; }
-
     [Parameter] public Guid id { get; set; }
-
     private Algorithm algorithm;
-
     private Algorithm.AlgorithmCategory? parsedCategory;
+    
+    private Dictionary<Guid, bool> selectedDataPointStates = new();
+    private bool showModal = false;
+    private bool showMissingDataPoints = false;
+    private List<DataPoint> missingDataPoints = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,8 +134,36 @@ else
         }
         else
         {
-            Console.WriteLine("Kategorie konnte nicht geparst werden.");
+            Console.WriteLine("Category couldn't beparsed.");
         }
+        
+        if (algorithm is not null)
+        {
+            selectedDataPointStates = algorithm.DataPoints.ToDictionary(dp => dp.DataPointId, dp => true);
+        }
+    }
+    
+    private void OpenDataPointModal()
+    {
+        showModal = true;
+        showMissingDataPoints = false;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private void CheckMissingDataPoints()
+    {
+        if (algorithm is null) return;
+
+        missingDataPoints = algorithm.DataPoints
+            .Where(dp => !selectedDataPointStates.GetValueOrDefault(dp.DataPointId))
+            .ToList();
+
+        showModal = false;
+        showMissingDataPoints = true;
     }
 
 }
