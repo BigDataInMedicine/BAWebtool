@@ -7,13 +7,12 @@
 
 <!-- Such-Funktion -->
 <input type="text" @bind="searchTerm" 
-       @oninput="FilterAlgorithms"
        placeholder="Search for title or author..."
        class="p-2 border rounded mb-4 w-full" />
 
 
 <!-- Kategorieauswahl -->
-<select @bind="_selectedAlgorithmCategory" @bind:after="SaveCategory" class="form-select mb-3">
+<select @bind="_selectedAlgorithmCategory" @bind:after="OnCategoryChanged" class="form-select mb-3">
     @foreach (var category in Enum.GetValues<Algorithm.AlgorithmCategory>())
     {
         <option value="@category">@category.GetDisplayName()</option>
@@ -25,9 +24,9 @@
     <label for="yearMin" class="form-label">Select year range:</label>
     <div class="d-flex align-items-center gap-3">
         <input type="range" id="yearMin" min="2000" max="2025" step="1"
-               @bind="rangeValue[0]" @bind:event="onchange" />
+               @bind="rangeValue[0]" @oninput="ApplyFilter" />
         <input type="range" id="yearMax" min="2000" max="2025" step="1"
-               @bind="rangeValue[1]" @bind:event="onchange" />
+               @bind="rangeValue[1]" @oninput="ApplyFilter" />
         <span class="ms-2">@rangeValue[0] – @rangeValue[1]</span>
     </div>
 </div>
@@ -66,7 +65,8 @@
                             <input type="checkbox"
                                    id="@dp.DataPointId"
                                    class="form-check-input"
-                                   @bind="selectedDataPointIds[dp.DataPointId]" />
+                                   @bind="selectedDataPointIds[dp.DataPointId]" 
+                                   @bind:after="ApplyFilter"/>
                             <label class="form-check-label" for="@dp.DataPointId">@dp.DataPointName</label>
                         </div>
                         }
@@ -127,13 +127,19 @@
         await ApplyFilter(); // initiale Filterung
     }
     
+    private async Task OnCategoryChanged()
+    {
+        await SessionStorage.SetItemAsync("selectedCategory", _selectedAlgorithmCategory.ToString());
+        await ApplyFilter();
+    }
+    
     private async Task FilterAlgorithms(ChangeEventArgs e)
     {
         searchTerm = e?.Value?.ToString() ?? string.Empty;
         await ApplyFilter();
     }
 
-    private Task ApplyFilter()
+    private async Task ApplyFilter()
     {
         IEnumerable<Algorithm> filtered = allAlgorithms;
 
@@ -141,7 +147,8 @@
         {
             filtered = filtered.Where(al => al.Category == _selectedAlgorithmCategory);
         }
-
+        
+        
         if (selectedDataPointIds != null && selectedDataPointIds.Values.Any(v => v))
         {
             var selectedIds = selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
@@ -159,12 +166,9 @@
         }
 
         selectedAlgorithms = filtered.ToList();
-        StateHasChanged(); // falls von einem Event aufgerufen
-        return Task.CompletedTask;
+        StateHasChanged();
     }
-
-
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -174,34 +178,30 @@
             if (!string.IsNullOrEmpty(storedCategory) && Enum.TryParse(storedCategory, out Algorithm.AlgorithmCategory parsedCategory))
             {
                 _selectedAlgorithmCategory = parsedCategory;
+                await ApplyFilter();
                 StateHasChanged(); // UI nach dem Laden der Daten aktualisieren
             }
         }
     }
     
-    private async Task SaveCategory()
-    {
-        await SessionStorage.SetItemAsync("selectedCategory", _selectedAlgorithmCategory.ToString());
-    }
-    
-    private Task SelectAllDataPoints()
+    private async Task SelectAllDataPoints()
     {
         foreach (var key in selectedDataPointIds.Keys.ToList())
         {
             selectedDataPointIds[key] = true;
         }
 
-        return Task.CompletedTask;
+        await ApplyFilter();
     }
 
-    private Task DeselectAllDataPoints()
+    private async Task DeselectAllDataPoints()
     {
         foreach (var key in selectedDataPointIds.Keys.ToList())
         {
             selectedDataPointIds[key] = false;
         }
 
-        return Task.CompletedTask;
+        await ApplyFilter();
     }
     
     private void ToggleFilter()
