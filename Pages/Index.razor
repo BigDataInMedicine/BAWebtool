@@ -46,6 +46,8 @@
                     @onclick="SelectAllDataPoints">Select all</button>
             <button style="background-color: #4b5563; color: white;" class="px-3 py-1 rounded hover:brightness-110"
                     @onclick="DeselectAllDataPoints">Deselect all</button>
+            <button style="background-color: #1e90ff; border-color: #1e90ff; color: white" class="px-3 py-1 rounded hover:brightness-110"
+                    @onclick="OpenMissingDataModal">Show Algorithms with Missing Data Points</button>
         </div>
 
         @if (allDataPoints is not null)
@@ -81,11 +83,64 @@
 <!-- Algorithmen anzeigen -->
 <AlgorithmGrid Algorithms="selectedAlgorithms" />
 
+<!-- Showing algorithms with missing data points-->
+@if (showMissingModal)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Algorithms Missing Data Points</h5>
+                    <button type="button" class="btn-close" @onclick="CloseMissingModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (algorithmsWithMissingData.Any())
+                    {
+                        <ul class="list-group mb-3">
+                            @foreach (var alg in algorithmsWithMissingData)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@alg.AlgorithmName</span>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowMissingDataPointsFor(alg)">
+                                        Show Missing
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No algorithms have missing data points based on your current selection.</p>
+                    }
+
+                    @if (selectedMissingDataPoints.Any())
+                    {
+                        <div class="alert alert-warning">
+                            <strong>Missing Data Points:</strong>
+                            <ul>
+                                @foreach (var dp in selectedMissingDataPoints)
+                                {
+                                    <li>@dp.DataPointName</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseMissingModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 <NavLink class="btn btn-primary" href="/createAlgorithm">Creating new algorithm</NavLink>
 
 @code {
     private string _searchTerm = "";
+
     private string searchTerm
     {
         get => _searchTerm;
@@ -98,19 +153,24 @@
             }
         }
     }
+
     private Algorithm.AlgorithmCategory _selectedAlgorithmCategory = Algorithm.AlgorithmCategory.AllCategories;
-    
+
     private List<DataPoint> allDataPoints = new();
     private Dictionary<Guid, bool> selectedDataPointIds = new(); // Guid -> IsSelected
-    
+
     private bool showDataPointFilter = false;
 
     public int[] rangeValue = { 2000, 2025 };
-    
+
     private List<Algorithm> allAlgorithms = new();
     private List<Algorithm> selectedAlgorithms = new();
-    
-    
+
+    private bool showMissingModal = false;
+    private List<Algorithm> algorithmsWithMissingData = new();
+    private List<DataPoint> selectedMissingDataPoints = new();
+
+
     protected override async Task OnInitializedAsync()
     {
         allDataPoints = await DbContext.DataPoints.ToListAsync();
@@ -126,13 +186,13 @@
 
         await ApplyFilter(); // initiale Filterung
     }
-    
+
     private async Task OnCategoryChanged()
     {
         await SessionStorage.SetItemAsync("selectedCategory", _selectedAlgorithmCategory.ToString());
         await ApplyFilter();
     }
-    
+
     private async Task FilterAlgorithms(ChangeEventArgs e)
     {
         searchTerm = e?.Value?.ToString() ?? string.Empty;
@@ -147,8 +207,8 @@
         {
             filtered = filtered.Where(al => al.Category == _selectedAlgorithmCategory);
         }
-        
-        
+
+
         if (selectedDataPointIds != null && selectedDataPointIds.Values.Any(v => v))
         {
             var selectedIds = selectedDataPointIds.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
@@ -168,7 +228,7 @@
         selectedAlgorithms = filtered.ToList();
         StateHasChanged();
     }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -183,7 +243,7 @@
             }
         }
     }
-    
+
     private async Task SelectAllDataPoints()
     {
         foreach (var key in selectedDataPointIds.Keys.ToList())
@@ -203,10 +263,44 @@
 
         await ApplyFilter();
     }
-    
+
     private void ToggleFilter()
     {
         showDataPointFilter = !showDataPointFilter;
     }
-    
+
+    private void OpenMissingDataModal()
+    {
+        var selectedData = selectedDataPointIds
+            .Where(kv => kv.Value)
+            .Select(kv => kv.Key)
+            .ToHashSet();
+
+        algorithmsWithMissingData = allAlgorithms
+            .Where(alg => alg.DataPoints.Any(dp => !selectedData.Contains(dp.DataPointId)))
+            .ToList();
+
+        selectedMissingDataPoints.Clear();
+        showMissingModal = true;
+    }
+
+    private void CloseMissingModal()
+    {
+        showMissingModal = false;
+        selectedMissingDataPoints.Clear();
+    }
+
+    private void ShowMissingDataPointsFor(Algorithm algorithm)
+    {
+        var selectedData = selectedDataPointIds
+            .Where(kv => kv.Value)
+            .Select(kv => kv.Key)
+            .ToHashSet();
+
+        selectedMissingDataPoints = algorithm.DataPoints
+            .Where(dp => !selectedData.Contains(dp.DataPointId))
+            .ToList();
+    }
+
+}
 }
