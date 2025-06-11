@@ -28,7 +28,7 @@ public class Algorithm
     [Required] 
     public string MethodApproach { get; set; } //(data-driven or knowledge-based)
     
-    public string LearningType { get; set; } //(if it's data-driven)
+    public string LearningType { get; set; } //(if it's data-driven - supervised or unsupervised)
     
     public string? ModelUrl { get; set; } 
     
@@ -37,6 +37,8 @@ public class Algorithm
     public ICollection<string> Derivations { get; set; } = new List<string>();
 
     public List<DataPoint> DataPoints { get; set; } = []; // Navigation Property
+    
+    public List<Attribute> Attributes { get; set; } = new List<Attribute>(); // Navigation Property
     
     
     

@@ -17,6 +17,21 @@ namespace BaWebtool2.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
 
+            modelBuilder.Entity("AlgorithmAttribute", b =>
+                {
+                    b.Property<Guid>("AlgorithmsAlgorithmId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AttributesAttributeId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AlgorithmsAlgorithmId", "AttributesAttributeId");
+
+                    b.HasIndex("AttributesAttributeId");
+
+                    b.ToTable("AlgorithmAttribute");
+                });
+
             modelBuilder.Entity("AlgorithmDataPoint", b =>
                 {
                     b.Property<Guid>("AlgorithmsAlgorithmId")
@@ -83,6 +98,32 @@ namespace BaWebtool2.Migrations
                     b.ToTable("Algorithms");
                 });
 
+            modelBuilder.Entity("BaWebtool2.Data.Attribute", b =>
+                {
+                    b.Property<Guid>("AttributeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttributeDescription")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttributeName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttributeType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DataType")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("ValueSet")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AttributeId");
+
+                    b.ToTable("Attributes");
+                });
+
             modelBuilder.Entity("BaWebtool2.Data.DataPoint", b =>
                 {
                     b.Property<Guid>("DataPointId")
@@ -116,6 +157,21 @@ namespace BaWebtool2.Migrations
                     b.HasKey("DataPointId");
 
                     b.ToTable("DataPoints");
+                });
+
+            modelBuilder.Entity("AlgorithmAttribute", b =>
+                {
+                    b.HasOne("BaWebtool2.Data.Algorithm", null)
+                        .WithMany()
+                        .HasForeignKey("AlgorithmsAlgorithmId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BaWebtool2.Data.Attribute", null)
+                        .WithMany()
+                        .HasForeignKey("AttributesAttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AlgorithmDataPoint", b =>

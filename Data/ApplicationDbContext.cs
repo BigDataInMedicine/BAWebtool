@@ -6,6 +6,7 @@ public class ApplicationDbContext : DbContext
 {
     public virtual DbSet<Algorithm> Algorithms { get; set; }
     public virtual DbSet<DataPoint> DataPoints { get; set; }
+    public virtual DbSet<Attribute> Attributes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -17,6 +18,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<DataPoint>()
             .HasMany(dp => dp.Algorithms)
             .WithMany(a => a.DataPoints);
+        
+        modelBuilder.Entity<Algorithm>()
+            .HasMany(a => a.Attributes)
+            .WithMany(at => at.Algorithms);
         
     }
 
