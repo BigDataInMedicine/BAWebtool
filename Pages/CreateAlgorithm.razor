@@ -154,8 +154,8 @@
         @if (AvailableDataPoints is not null)
         {
             var grouped = AvailableDataPoints
-            .GroupBy(dp => dp.Category) // oder dp.Category
-            .OrderBy(g => g.Key); // alphabetisch sortieren z. B.
+                .GroupBy(dp => dp.Category) // oder dp.Category
+                .OrderBy(g => g.Key); // alphabetisch sortieren z. B.
 
             <div class="row">
                 @foreach (var group in grouped)
@@ -179,6 +179,38 @@
             </div>
         }
     </div>
+
+    <div class="form-group mb-4">
+        <label class="form-label fs-5 mb-3">Related Attributes</label>
+
+        @if (AvailableAttributes is not null)
+        {
+        var grouped = AvailableAttributes
+        .GroupBy(attr => attr.AttributeType) 
+        .OrderBy(g => g.Key); // alphabetisch sortieren z. B.
+
+        <div class="row">
+            @foreach (var group in grouped)
+            {
+            <div class="col-md-6 col-lg-4 mb-4"> <!-- Zwei- bis Dreispaltig -->
+                <h6 class="fw-bold">@group.Key</h6>
+                @foreach (var attr in group)
+                {
+                <div class="form-check">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           id="dp_@attr.AttributeId"
+                           @onchange="e => ToggleAttribute(attr, bool.TryParse(e?.Value?.ToString(), out var b) && b)" />
+                    <label class="form-check-label" for="dp_@attr.AttributeId">
+                        @attr.AttributeName
+                    </label>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </div>
     
     <div class="mt-4">
         <button type="submit" class="btn btn-primary px-4">Submit</button>
@@ -197,12 +229,15 @@
     private int SelectedYear { get; set; } = DateTime.Now.Year;
     private string MethodApproach { get; set; } = "N/A";
     private string LearningType { get; set; } = "N/A";
+    private List<AlgAttribute> AvailableAttributes { get; set; } = [];
+    private List<AlgAttribute> SelectedAttributes { get; set; } = [];
 
     private IEnumerable<int> Years => Enumerable.Range(1900, DateTime.Now.Year - 1900 + 1).Reverse();
 
     protected override async Task OnInitializedAsync()
     {
         AvailableDataPoints = await DbContext.DataPoints.ToListAsync();
+        AvailableAttributes = await DbContext.Attributes.ToListAsync();
     }
 
     private void ToggleDataPoint(DataPoint dp, bool selected)
@@ -215,6 +250,19 @@
         else
         {
             SelectedDataPoints.Remove(dp);
+        }
+    }
+    
+    private void ToggleAttribute(AlgAttribute attr, bool selected)
+    {
+        if (selected)
+        {
+            if (!SelectedAttributes.Contains(attr))
+                SelectedAttributes.Add(attr);
+        }
+        else
+        {
+            SelectedAttributes.Remove(attr);
         }
     }
 
@@ -236,6 +284,7 @@
     {
         Algorithm.AlgorithmId = Guid.NewGuid();
         Algorithm.DataPoints = SelectedDataPoints;
+        Algorithm.Attributes = SelectedAttributes;
 
         DbContext.Algorithms.Add(Algorithm);
         await DbContext.SaveChangesAsync();
