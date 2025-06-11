@@ -8,7 +8,7 @@
 
 @if (algorithm is null)
     {
-    <p>Load algorithm ...</p>
+        <p>Load algorithm ...</p>
     }
 else
 {
@@ -30,7 +30,7 @@ else
     @if (showMissingDataPoints)
     {
         <div class="alert alert-warning mt-3">
-            <strong>Missing data points:</strong>
+            <strong>Check missing data</strong>
             <ul>
                 @foreach (var dp in missingDataPoints)
                 {
@@ -48,7 +48,7 @@ else
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Select the data points you have: </h5>
+                        <h5 class="modal-title">Select the data you have: </h5>
                         <button type="button" class="btn-close" @onclick="CloseModal"></button>
                     </div>
                     <div class="modal-body">
@@ -65,7 +65,7 @@ else
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
-                        <button class="btn btn-success" @onclick="CheckMissingDataPoints">Ready</button>
+                        <button class="btn btn-success" @onclick="CheckMissingDataPoints">Check missing data</button>
                     </div>
                 </div>
             </div>
@@ -101,11 +101,33 @@ else
         </ul>
     }
     
-}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Atomic Attribute</th>
+            <th>Value Set</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var dp in algorithm.DataPoints)
+        {
+        <tr>
+            <td>@dp.DataPointName</td>
+            <td>@dp.DataPointDescription</td>
+            <td>@dp.AtomicAttribute</td>
+            <td>@(dp.ValueSet != null ? string.Join(", ", dp.ValueSet): " - ") </td>
+
+        </tr>
+        }
+        </tbody>
+    </table>
+    
 
 
 
-@code {
+    @code {
     [Parameter] public string category { get; set; }
     [Parameter] public Guid id { get; set; }
     private Algorithm algorithm;
