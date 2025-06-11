@@ -8,16 +8,17 @@ public class Attribute
 {
     public Guid AttributeId { get; set; }
     
-    public string? AttributeName { get; set; }
+    [Required(ErrorMessage = "The designation of the attribute is required.")]
+    public string AttributeName { get; set; }
     
     public string? AttributeType { get; set; }
     
     public string? AttributeDescription { get; set; }
     
-    public string? DataType { get; set; }
+    [Required(ErrorMessage = "The datatype of the attribute is required.")]
+    public string DataType { get; set; }
     
     public List<string>? ValueSet { get; set; }
-    
     public List<Algorithm>? Algorithms { get; set; } // Navigation Property
     
     

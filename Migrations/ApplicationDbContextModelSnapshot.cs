@@ -108,12 +108,14 @@ namespace BaWebtool2.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AttributeName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AttributeType")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DataType")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.PrimitiveCollection<string>("ValueSet")
