@@ -63,6 +63,9 @@
         </small>
     </div>
 
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary px-4">Submit</button>
+    </div>
 </EditForm>
 
 @code {
@@ -91,7 +94,7 @@
         await DbContext.SaveChangesAsync();
 
         Console.WriteLine("Attribute valid and ready to save!");
-        Nav.NavigateTo("/");
+        Nav.NavigateTo("/attributes");
     }
     
     private bool HasError(string fieldName) =>

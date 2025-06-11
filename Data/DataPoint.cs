@@ -39,7 +39,8 @@ public class DataPoint
         Diagnosis,
         Treatments,
         LaboratoryData,
-        ImagingData
+        ImagingData,
+        ImagingFeatures
     }
 
 }
@@ -71,6 +72,7 @@ public static class DataPointExtensions
             DataPoint.DataPointCategory.Treatments => "Treatments",
             DataPoint.DataPointCategory.LaboratoryData => "Laboratory data",
             DataPoint.DataPointCategory.ImagingData => "Data from imaging procedures",
+            DataPoint.DataPointCategory.ImagingFeatures => "Imaging features",
             _ => throw new ArgumentOutOfRangeException(nameof(category), category, null)
         };
     }
