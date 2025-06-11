@@ -1,27 +1,27 @@
 @page "/createAttribute"
 @using BaWebtool2.Data
-@using Attribute = BaWebtool2.Data.Attribute
+@using Attribute = BaWebtool2.Data.AlgAttribute
 @inject ApplicationDbContext DbContext
 @inject NavigationManager Nav
 
 <h3>Create Attribute</h3>
 
-<EditForm Model="@Attribute" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="@AlgAttribute" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
 
     <!-- Attribute Name -->
     <div class="form-group mb-4">
         <label>Attribute Name *</label>
-        <InputText class="@($"form-control {(HasError(nameof(Attribute.AttributeName)) ? "is-invalid" : "")}")"
-                   @bind-Value="Attribute.AttributeName" />
-        <ValidationMessage For="@(() => Attribute.AttributeName)" />
+        <InputText class="@($"form-control {(HasError(nameof(AlgAttribute.AttributeName)) ? "is-invalid" : "")}")"
+                   @bind-Value="AlgAttribute.AttributeName" />
+        <ValidationMessage For="@(() => AlgAttribute.AttributeName)" />
     </div>
 
     <!-- AttributeType (optional) -->
     <div class="form-group mb-4">
         <label>Type of attribute</label>
         <InputSelect class="form-control"
-                     @bind-Value="Attribute.AttributeType">
+                     @bind-Value="AlgAttribute.AttributeType">
             <option value="">-- select --</option>
             <option value="Atomic attribute">Atomic</option>
             <option value="Derived attribute">Derived</option>
@@ -34,15 +34,15 @@
     <div class="form-group mb-4">
         <label>Description</label>
         <InputTextArea class="form-control"
-                       @bind-Value="Attribute.AttributeDescription"
+                       @bind-Value="AlgAttribute.AttributeDescription"
                        rows="3" />
     </div>
 
     <!-- DataType -->
     <div class="form-group mb-4">
         <label>Datatype *</label>
-        <InputSelect class="@($"form-control {(HasError(nameof(Attribute.DataType)) ? "is-invalid" : "")}")"
-                     @bind-Value="Attribute.DataType" >
+        <InputSelect class="@($"form-control {(HasError(nameof(AlgAttribute.DataType)) ? "is-invalid" : "")}")"
+                     @bind-Value="AlgAttribute.DataType" >
             <option value="">-- select --</option>
             <option value="Boolean">Boolean</option>
             <option value="String">String</option>
@@ -66,28 +66,28 @@
 </EditForm>
 
 @code {
-    private Attribute Attribute { get; set; } = new();
+    private Attribute AlgAttribute { get; set; } = new();
     private EditContext? EditContext;
     private string ValueSetInput { get; set; } = "";
 
     protected override void OnInitialized()
     {
-        EditContext = new EditContext(Attribute);
+        EditContext = new EditContext(AlgAttribute);
     }
 
     private async Task HandleValidSubmit()
     {
         if (!string.IsNullOrWhiteSpace(ValueSetInput))
         {
-            Attribute.ValueSet = ValueSetInput
+            AlgAttribute.ValueSet = ValueSetInput
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToList();
         }
 
-        if (Attribute.AttributeId == Guid.Empty)
-            Attribute.AttributeId = Guid.NewGuid();
+        if (AlgAttribute.AttributeId == Guid.Empty)
+            AlgAttribute.AttributeId = Guid.NewGuid();
 
-        DbContext.Attributes.Add(Attribute);
+        DbContext.Attributes.Add(AlgAttribute);
         await DbContext.SaveChangesAsync();
 
         Console.WriteLine("Attribute valid and ready to save!");
@@ -95,6 +95,6 @@
     }
     
     private bool HasError(string fieldName) =>
-        EditContext?.GetValidationMessages(new FieldIdentifier(Attribute, fieldName)).Any() ?? false;
+        EditContext?.GetValidationMessages(new FieldIdentifier(AlgAttribute, fieldName)).Any() ?? false;
 
 }

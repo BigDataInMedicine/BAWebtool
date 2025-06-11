@@ -38,7 +38,7 @@ public class Algorithm
 
     public List<DataPoint> DataPoints { get; set; } = []; // Navigation Property
     
-    public List<Attribute> Attributes { get; set; } = new List<Attribute>(); // Navigation Property
+    public List<AlgAttribute> Attributes { get; set; } = new List<AlgAttribute>(); // Navigation Property
     
     
     

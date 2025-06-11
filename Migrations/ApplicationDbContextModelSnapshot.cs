@@ -17,7 +17,7 @@ namespace BaWebtool2.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
 
-            modelBuilder.Entity("AlgorithmAttribute", b =>
+            modelBuilder.Entity("AlgAttributeAlgorithm", b =>
                 {
                     b.Property<Guid>("AlgorithmsAlgorithmId")
                         .HasColumnType("TEXT");
@@ -29,7 +29,7 @@ namespace BaWebtool2.Migrations
 
                     b.HasIndex("AttributesAttributeId");
 
-                    b.ToTable("AlgorithmAttribute");
+                    b.ToTable("AlgAttributeAlgorithm");
                 });
 
             modelBuilder.Entity("AlgorithmDataPoint", b =>
@@ -45,6 +45,34 @@ namespace BaWebtool2.Migrations
                     b.HasIndex("DataPointsDataPointId");
 
                     b.ToTable("AlgorithmDataPoint");
+                });
+
+            modelBuilder.Entity("BaWebtool2.Data.AlgAttribute", b =>
+                {
+                    b.Property<Guid>("AttributeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttributeDescription")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttributeName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttributeType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DataType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("ValueSet")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AttributeId");
+
+                    b.ToTable("Attributes");
                 });
 
             modelBuilder.Entity("BaWebtool2.Data.Algorithm", b =>
@@ -98,34 +126,6 @@ namespace BaWebtool2.Migrations
                     b.ToTable("Algorithms");
                 });
 
-            modelBuilder.Entity("BaWebtool2.Data.Attribute", b =>
-                {
-                    b.Property<Guid>("AttributeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AttributeDescription")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AttributeName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AttributeType")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.PrimitiveCollection<string>("ValueSet")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("AttributeId");
-
-                    b.ToTable("Attributes");
-                });
-
             modelBuilder.Entity("BaWebtool2.Data.DataPoint", b =>
                 {
                     b.Property<Guid>("DataPointId")
@@ -161,7 +161,7 @@ namespace BaWebtool2.Migrations
                     b.ToTable("DataPoints");
                 });
 
-            modelBuilder.Entity("AlgorithmAttribute", b =>
+            modelBuilder.Entity("AlgAttributeAlgorithm", b =>
                 {
                     b.HasOne("BaWebtool2.Data.Algorithm", null)
                         .WithMany()
@@ -169,7 +169,7 @@ namespace BaWebtool2.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BaWebtool2.Data.Attribute", null)
+                    b.HasOne("BaWebtool2.Data.AlgAttribute", null)
                         .WithMany()
                         .HasForeignKey("AttributesAttributeId")
                         .OnDelete(DeleteBehavior.Cascade)

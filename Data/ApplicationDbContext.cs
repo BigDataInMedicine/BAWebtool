@@ -6,7 +6,7 @@ public class ApplicationDbContext : DbContext
 {
     public virtual DbSet<Algorithm> Algorithms { get; set; }
     public virtual DbSet<DataPoint> DataPoints { get; set; }
-    public virtual DbSet<Attribute> Attributes { get; set; }
+    public virtual DbSet<AlgAttribute> Attributes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

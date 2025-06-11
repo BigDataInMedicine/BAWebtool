@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BaWebtool2.Data;
 
-public class Attribute
+[EntityTypeConfiguration(typeof(AlgAttributeConfiguration))]
+public class AlgAttribute
 {
     public Guid AttributeId { get; set; }
     
@@ -22,9 +23,9 @@ public class Attribute
     public List<Algorithm>? Algorithms { get; set; } // Navigation Property
     
     
-    public class AttributConfiguration : IEntityTypeConfiguration<Attribute>
+    public class AlgAttributeConfiguration : IEntityTypeConfiguration<AlgAttribute>
     {
-        public void Configure(EntityTypeBuilder<Attribute> builder)
+        public void Configure(EntityTypeBuilder<AlgAttribute> builder)
         {
             builder.HasKey(a => a.AttributeId);
             builder.Property(a => a.AttributeName).IsRequired();
