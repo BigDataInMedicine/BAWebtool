@@ -76,6 +76,7 @@
 @code {
     private DataPoint DataPoint { get; set; } = new();
     private string ValueSetInput { get; set; } = "";
+    private EditContext? EditContext;
 
     private async Task HandleValidSubmit()
     {
@@ -98,8 +99,6 @@
     
     private bool HasError(string fieldName) =>
         EditContext?.GetValidationMessages(new FieldIdentifier(DataPoint, fieldName)).Any() ?? false;
-    
-    private EditContext? EditContext;
 
     protected override void OnInitialized()
     {
