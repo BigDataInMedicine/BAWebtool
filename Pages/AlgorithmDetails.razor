@@ -100,29 +100,30 @@ else
             }
         </ul>
     }
-    
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Atomic Attribute</th>
-            <th>Value Set</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var dp in algorithm.DataPoints)
-        {
-        <tr>
-            <td>@dp.DataPointName</td>
-            <td>@dp.DataPointDescription</td>
-            <td>@dp.AtomicAttribute</td>
-            <td>@(dp.ValueSet != null ? string.Join(", ", dp.ValueSet): " - ") </td>
 
-        </tr>
-        }
-        </tbody>
-    </table>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type of Attribute</th>
+        <th>Description</th>
+        <th>Datatype</th>
+        <th>Value set</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var attr in algorithm.Attributes.OrderBy(attr => attr.AttributeType))
+    {
+    <tr>
+        <td>@attr.AttributeName</td>
+        <td>@attr.AttributeType</td>
+        <td>@attr.AttributeDescription</td>
+        <td>@attr.DataType</td>
+        <td>@(attr.ValueSet != null ? string.Join(", ", attr.ValueSet): " - ") </td>
+    </tr>
+    }
+    </tbody>
+</table>
     
 
 

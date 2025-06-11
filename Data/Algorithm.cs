@@ -11,21 +11,20 @@ public class Algorithm
     
     public AlgorithmCategory Category { get; set; }
 
-    [Required]
+    [Required (ErrorMessage = "The designation of the algorithm is required.")]
     public string AlgorithmName { get; set; } = default!;
     
     public string? AlgorithmDescription { get; set; }
 
-    [Required]
+    [Required (ErrorMessage = "The author is required.")]
     public string Author { get; set; } = default!;
     
-    [Required] 
+    [Required (ErrorMessage = "The year is required.")] 
     public int Year { get; set; } //Year of publication 
     
-    [Required] 
+    [Required (ErrorMessage = "The displayed description is required.")] 
     public string  DisplayDescription { get; set; }
     
-    [Required] 
     public string MethodApproach { get; set; } //(data-driven or knowledge-based)
     
     public string LearningType { get; set; } //(if it's data-driven - supervised or unsupervised)

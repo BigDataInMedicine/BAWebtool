@@ -20,7 +20,8 @@ public class AlgAttribute
     public string DataType { get; set; }
     
     public List<string>? ValueSet { get; set; }
-    public List<Algorithm>? Algorithms { get; set; } // Navigation Property
+    
+    public List<Algorithm> Algorithms { get; set; } // Navigation Property
     
     
     public class AlgAttributeConfiguration : IEntityTypeConfiguration<AlgAttribute>

@@ -6,6 +6,8 @@
 
 <EditForm Model="@Algorithm" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
+    <ValidationSummary />
+
 
     <div class="form-group mb-4">
         <label>Algorithm Name *</label>
@@ -22,6 +24,11 @@
     <div class="form-group mb-4">
         <label>Description</label>
         <InputTextArea class="form-control" @bind-Value="Algorithm.AlgorithmDescription" rows="3" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label>Short description (that is displayed in overviews)</label>
+        <InputTextArea class="form-control" @bind-Value="Algorithm.DisplayDescription" rows="3" />
     </div>
 
     <div class="form-group mb-4">
@@ -71,7 +78,7 @@
         </div>
     </div>
 
-    @if (MethodApproach == "knowledge-based")
+    @if (MethodApproach == "data-driven")
     {
         <div class="form-group mt-4">
             <label>Learning Type:</label>
@@ -252,7 +259,7 @@
             SelectedDataPoints.Remove(dp);
         }
     }
-    
+
     private void ToggleAttribute(AlgAttribute attr, bool selected)
     {
         if (selected)
@@ -282,14 +289,26 @@
 
     private async Task HandleValidSubmit()
     {
-        Algorithm.AlgorithmId = Guid.NewGuid();
-        Algorithm.DataPoints = SelectedDataPoints;
-        Algorithm.Attributes = SelectedAttributes;
+        Console.WriteLine("Submit wurde aufgerufen.");
+        try
+        {
+            Algorithm.AlgorithmId = Guid.NewGuid();
+            Algorithm.DataPoints = SelectedDataPoints;
+            Algorithm.Attributes = SelectedAttributes;
 
-        DbContext.Algorithms.Add(Algorithm);
-        await DbContext.SaveChangesAsync();
+            Algorithm.MethodApproach = MethodApproach;
+            Algorithm.LearningType = LearningType;
 
-        Nav.NavigateTo("/");
+            DbContext.Algorithms.Add(Algorithm);
+            await DbContext.SaveChangesAsync();
+
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error occured while saving the algorithm: " + ex.Message);
+        }
+        
     }
 
     private void AddConstraint()
@@ -301,7 +320,7 @@
             NewConstraint = string.Empty;
         }
     }
-    
+
     private void AddDerivation()
     {
         if (!string.IsNullOrWhiteSpace(NewDerivation))
@@ -311,11 +330,11 @@
             NewDerivation = string.Empty;
         }
     }
-    
+
     private void OnMethodApproachChanged(ChangeEventArgs e)
     {
         MethodApproach = e.Value?.ToString() ?? "n.a.";
-        if (MethodApproach != "knowledge-based")
+        if (MethodApproach != "data-driven")
         {
             LearningType = "n.a.";
         }
