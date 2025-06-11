@@ -1,0 +1,66 @@
+@page "/attributes"
+@using BaWebtool2.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JS
+
+<h3>All attributes</h3>
+
+<NavLink class="btn btn-primary" href="/createAttribute">Creating new attribute</NavLink>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var attr in AllAttributes.OrderBy(attr => attr.AttributeType))
+    {
+        <tr>
+            <td>@attr.AttributeName</td>
+            <td>@attr.AttributeDescription</td>
+            <td>
+                <button class="btn btn-sm btn-danger"
+                        @onclick="() => AskDelete(attr.AttributeId)">
+                    Delete
+                </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+@code {
+    private List<AlgAttribute> AllAttributes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllAttributes = await DbContext.Attributes.ToListAsync();
+    }
+
+    private async Task AskDelete(Guid id)
+    {
+        // Bestätigungsdialog per JavaScript
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Eintrag wirklich löschen?");
+        if (confirmed)
+            await Delete(id);
+    }
+
+    private async Task Delete(Guid id)
+    {
+        var attr = await DbContext.Attributes.FindAsync(id);
+        if (attr != null)
+        {
+            DbContext.Attributes.Remove(attr);
+            await DbContext.SaveChangesAsync();
+
+            // Sofort aus der UI-Liste nehmen, damit es verschwindet
+            AllAttributes.RemoveAll(x => x.AttributeId == id);
+            StateHasChanged();
+        }
+    }
+}
