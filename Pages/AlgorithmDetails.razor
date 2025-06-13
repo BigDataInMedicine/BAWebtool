@@ -100,8 +100,10 @@ else
             }
         </ul>
     }
+    
+    
 
-<table class="table">
+    <table class="table">
     <thead>
     <tr>
         <th>Name</th>
@@ -126,8 +128,6 @@ else
 </table>
     
 
-
-
     @code {
     [Parameter] public string category { get; set; }
     [Parameter] public Guid id { get; set; }
@@ -141,7 +141,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine($"Kategorie: {category}, ID: {id}");
+        Console.WriteLine($"Category: {category}, ID: {id}");
 
         // Try to parse string to enum
         if (Enum.TryParse<Algorithm.AlgorithmCategory>(
@@ -153,6 +153,7 @@ else
 
             algorithm = await DbContext.Algorithms
                 .Include(a => a.DataPoints)
+                .Include(a => a.Attributes) 
                 .FirstAsync(a => a.AlgorithmId == id && a.Category == parsedCategory);
         }
         else
