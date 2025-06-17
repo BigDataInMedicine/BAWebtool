@@ -20,14 +20,17 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var attr in AllAttributes.OrderBy(attr => attr.AttributeType))
+
+    @foreach (var attr in AllAttributes
+    .OrderBy(attr => attr.AttributeType)
+    .ThenBy(attr => attr.AttributeName))
     {
         <tr>
             <td>@attr.AttributeName</td>
             <td>@attr.AttributeType</td>
             <td>@attr.AttributeDescription</td>
             <td>@attr.DataType</td>
-            <td>@(attr.ValueSet != null ? string.Join(", ", attr.ValueSet): " - ") </td>
+            <td>@(attr.ValueSet != null ? string.Join(", ", attr.ValueSet) : " - ") </td>
             <td>
                 <button class="btn btn-sm btn-danger"
                         @onclick="() => AskDelete(attr.AttributeId)">

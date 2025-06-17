@@ -192,16 +192,17 @@
 
         @if (AvailableAttributes is not null)
         {
-        var grouped = AvailableAttributes
-        .GroupBy(attr => attr.AttributeType) 
-        .OrderBy(g => g.Key); // alphabetisch sortieren z. B.
+            var grouped = AvailableAttributes
+                .GroupBy(attr => attr.AttributeType)
+                .OrderBy(g => g.Key);// alphabetisch sortieren z. B.
 
         <div class="row">
             @foreach (var group in grouped)
             {
             <div class="col-md-6 col-lg-4 mb-4"> <!-- Zwei- bis Dreispaltig -->
                 <h6 class="fw-bold">@group.Key</h6>
-                @foreach (var attr in group)
+                @foreach (var attr in group
+                              .OrderBy(attr => attr.AttributeName))
                 {
                 <div class="form-check">
                     <input type="checkbox"
