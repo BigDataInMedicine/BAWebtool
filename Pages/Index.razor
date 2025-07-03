@@ -6,9 +6,12 @@
 @inject ApplicationDbContext DbContext
 
 <!-- Such-Funktion -->
-<input type="text" @bind="searchTerm" 
+<input type="text"
+       value="@searchTerm"
+       @oninput="OnSearchChanged"
        placeholder="Search for title or author..."
        class="p-2 border rounded mb-4 w-full" />
+
 
 
 <!-- Kategorieauswahl -->
@@ -19,17 +22,27 @@
     }
 </select>
 
-<!-- Jahrauswahl -->
+<!-- Jahrauswahl mit Dropdowns -->
 <div class="mb-4">
-    <label for="yearMin" class="form-label">Select year range:</label>
+    <label class="form-label">Select year range:</label>
     <div class="d-flex align-items-center gap-3">
-        <input type="range" id="yearMin" min="2000" max="2025" step="1"
-               @bind="rangeValue[0]" @oninput="ApplyFilter" />
-        <input type="range" id="yearMax" min="2000" max="2025" step="1"
-               @bind="rangeValue[1]" @oninput="ApplyFilter" />
-        <span class="ms-2">@rangeValue[0] – @rangeValue[1]</span>
+        <select class="form-select" @bind="yearFrom" @bind:after="ApplyFilter">
+            @foreach (var year in Enumerable.Range(2000, 26))
+            {
+                <option value="@year">@year</option>
+            }
+        </select>
+        <span>bis</span>
+        <select class="form-select" @bind="yearTo" @bind:after="ApplyFilter">
+        @foreach (var year in Enumerable.Range(2000, 26))
+            {
+                <option value="@year">@year</option>
+            }
+        </select>
     </div>
+    <div class="mt-1 text-muted small">Period: @yearFrom – @yearTo</div>
 </div>
+
 
 
 <!-- Datenpunkt-Filter (ausklappbar) -->
@@ -141,18 +154,7 @@
 @code {
     private string _searchTerm = "";
 
-    private string searchTerm
-    {
-        get => _searchTerm;
-        set
-        {
-            if (_searchTerm != value)
-            {
-                _searchTerm = value;
-                _ = ApplyFilter();
-            }
-        }
-    }
+    private string searchTerm = string.Empty;
 
     private Algorithm.AlgorithmCategory _selectedAlgorithmCategory = Algorithm.AlgorithmCategory.AllCategories;
 
@@ -161,7 +163,8 @@
 
     private bool showDataPointFilter = false;
 
-    public int[] rangeValue = { 2000, 2025 };
+    private int yearFrom = 2000;
+    private int yearTo = 2025;
 
     private List<Algorithm> allAlgorithms = new();
     private List<Algorithm> selectedAlgorithms = new();
@@ -216,7 +219,8 @@
                 al.DataPoints.All(dp => selectedIds.Contains(dp.DataPointId)));
         }
 
-        filtered = filtered.Where(al => al.Year >= rangeValue[0] && al.Year <= rangeValue[1]);
+        filtered = filtered.Where(al => al.Year >= yearFrom && al.Year <= yearTo);
+
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -301,6 +305,12 @@
             .Where(dp => !selectedData.Contains(dp.DataPointId))
             .ToList();
     }
+    
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e?.Value?.ToString() ?? string.Empty;
+        await ApplyFilter();
+    }
 
-}
+
 }
