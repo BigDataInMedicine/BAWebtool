@@ -118,4 +118,20 @@ public static class AlgorithmExtensions
     }
     
     // Methode für Beschreibung der Kategorie
+    public static string GetCategoryDescription(this Algorithm.AlgorithmCategory category)
+    {
+        return category switch
+        {
+            Algorithm.AlgorithmCategory.Head => "Algorithms supporting the diagnosis and analysis of neurological conditions and cranial malformations, including brain-related diseases.",
+            Algorithm.AlgorithmCategory.Lungs => "Algorithms designed to assist in the detection, monitoring, and treatment planning of lung diseases and respiratory disorders.",
+            Algorithm.AlgorithmCategory.Eyes => "Algorithms focused on identifying, classifying, and monitoring various eye diseases and vision-related impairments.",
+            Algorithm.AlgorithmCategory.Metabolism => "Algorithms targeting disorders related to nutrition, hormonal balance, and metabolic function, including diabetes and obesity.",
+            Algorithm.AlgorithmCategory.Sepsis => "Algorithms for early detection, risk evaluation, and outcome prediction in patients with suspected or confirmed sepsis.",
+            Algorithm.AlgorithmCategory.Medication => "Algorithms that provide decision support for medication management, dosage recommendations, and drug interaction alerts.",
+            Algorithm.AlgorithmCategory.Mortality => "Algorithms analyzing patient data to predict mortality risk, hospitalization likelihood, and disease severity progression.",
+            Algorithm.AlgorithmCategory.Other => "A collection of algorithms that do not fit into the predefined categories but address specific or rare clinical scenarios.",
+            Algorithm.AlgorithmCategory.AllCategories => "Access to the full range of medical algorithms across all supported clinical areas and diagnostic domains.",
+            _ => throw new ArgumentOutOfRangeException(nameof(category), category, null)
+        };
+    }
 }
