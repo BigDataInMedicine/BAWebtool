@@ -34,6 +34,14 @@ a, .btn-link {
     color: red;
 }
 
+.background-datapoint {
+    background-color: rgba(128, 0, 128, 0.1); /* transparentes Lila */
+    color: #4a006e; /* dunkles Violett für Text */
+    border: 1px solid rgba(128, 0, 128, 0.2); /* leicht violetter Rand */
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -115,5 +123,7 @@ a, .btn-link {
     font-weight: bold;
     color: #333;
 }
+
+
 
     

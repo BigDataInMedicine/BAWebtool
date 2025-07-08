@@ -59,7 +59,7 @@
                     @onclick="SelectAllDataPoints">Select all</button>
             <button style="background-color: #4b5563; color: white;" class="px-3 py-1 rounded hover:brightness-110"
                     @onclick="DeselectAllDataPoints">Deselect all</button>
-            <button style="background-color: #1e90ff; border-color: #1e90ff; color: white" class="px-3 py-1 rounded hover:brightness-110"
+            <button style="background-color: #00008B; border-color: #00008B; color: white" class="px-3 py-1 rounded hover:brightness-110"
                     @onclick="OpenMissingDataModal">Show Algorithms with Missing Data Points</button>
         </div>
 
@@ -99,53 +99,65 @@
 <!-- Showing algorithms with missing data points-->
 @if (showMissingModal)
 {
-    <div class="modal-backdrop fade show"></div>
-    <div class="modal fade show d-block" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Algorithms Missing Data Points</h5>
-                    <button type="button" class="btn-close" @onclick="CloseMissingModal"></button>
-                </div>
-                <div class="modal-body">
-                    @if (algorithmsWithMissingData.Any())
+<div class="modal-backdrop fade show"></div>
+<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header" style="background-color: #483D8B; color: white;">
+                <h5 class="modal-title">Algorithms Missing Data Points</h5>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseMissingModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (algorithmsWithMissingData.Any())
+                {
+                <div class="mb-4">
+                    @foreach (var alg in algorithmsWithMissingData)
                     {
-                        <ul class="list-group mb-3">
-                            @foreach (var alg in algorithmsWithMissingData)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>@alg.AlgorithmName</span>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowMissingDataPointsFor(alg)">
-                                        Show Missing
-                                    </button>
-                                </li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <p>No algorithms have missing data points based on your current selection.</p>
-                    }
-
-                    @if (selectedMissingDataPoints.Any())
-                    {
-                        <div class="alert alert-warning">
-                            <strong>Missing Data Points:</strong>
-                            <ul>
-                                @foreach (var dp in selectedMissingDataPoints)
-                                {
-                                    <li>@dp.DataPointName</li>
-                                }
-                            </ul>
+                    <div class="card mb-2 shadow-sm">
+                        <div class="card-body">
+                            <div class="fw-semibold mb-2">
+                                @alg.AlgorithmName
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-sm btn-outline-danger"
+                                        style="min-width: 120px;"
+                                        @onclick="() => ShowMissingDataPointsFor(alg)">
+                                    Show Missing
+                                </button>
+                            </div>
                         </div>
+                    </div>
                     }
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" @onclick="CloseMissingModal">Close</button>
+                }
+                else
+                {
+                <div class="alert alert-success">
+                    No algorithms have missing data points based on your current selection.
                 </div>
+                }
+
+                @if (selectedMissingDataPoints.Any())
+                {
+                <div class="background-datapoint">
+                    <strong>Missing Data Points:</strong>
+                    <ul class="mb-0">
+                        @foreach (var dp in selectedMissingDataPoints)
+                        {
+                        <li>@dp.DataPointName</li>
+                        }
+                    </ul>
+                </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseMissingModal">Close</button>
             </div>
         </div>
     </div>
+</div>
+
+
 }
 
 
@@ -172,6 +184,7 @@
     private bool showMissingModal = false;
     private List<Algorithm> algorithmsWithMissingData = new();
     private List<DataPoint> selectedMissingDataPoints = new();
+    
 
 
     protected override async Task OnInitializedAsync()
@@ -306,11 +319,12 @@
             .ToList();
     }
     
+
+    
     private async Task OnSearchChanged(ChangeEventArgs e)
     {
         searchTerm = e?.Value?.ToString() ?? string.Empty;
         await ApplyFilter();
     }
-
-
+   
 }

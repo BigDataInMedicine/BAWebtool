@@ -25,11 +25,11 @@ else
         }
     </ul>
     
-    <button class="btn btn-primary" @onclick="OpenDataPointModal">Data points missing</button>
+    <button class="btn btn-primary my-3" @onclick="OpenDataPointModal">Data points missing</button>
 
     @if (showMissingDataPoints)
     {
-        <div class="alert alert-warning mt-3">
+        <div class="background-datapoint" style="margin-top:1rem; margin-bottom:1rem;">
             <strong>Your missing data</strong>
             <ul>
                 @foreach (var dp in missingDataPoints)
@@ -127,7 +127,7 @@ else
     </tbody>
 </table>
     
-
+    
     @code {
     [Parameter] public string category { get; set; }
     [Parameter] public Guid id { get; set; }
