@@ -5,7 +5,7 @@
 @inject ISessionStorageService SessionStorage
 @inject ApplicationDbContext DbContext
 
-<!-- Such-Funktion -->
+<!-- Search-Function -->
 <input type="text"
        value="@searchTerm"
        @oninput="OnSearchChanged"
@@ -14,7 +14,7 @@
 
 
 
-<!-- Kategorieauswahl -->
+<!-- Selection of category -->
 <select @bind="_selectedAlgorithmCategory" @bind:after="OnCategoryChanged" class="form-select mb-3">
     @foreach (var category in Enum.GetValues<Algorithm.AlgorithmCategory>())
     {
@@ -22,7 +22,7 @@
     }
 </select>
 
-<!-- Jahrauswahl mit Dropdowns -->
+<!-- Year-filter with Dropdowns -->
 <div class="mb-4">
     <label class="form-label">Select year range:</label>
     <div class="d-flex align-items-center gap-3">
@@ -45,7 +45,7 @@
 
 
 
-<!-- Datenpunkt-Filter (ausklappbar) -->
+<!-- Datapoint-Filter (foldable) -->
 <div class="mb-4">
     <strong @onclick="ToggleFilter" style="cursor: pointer;">
         <span>@(showDataPointFilter ? "▼" : "▶")</span>
@@ -93,7 +93,7 @@
 </div> 
 
 
-<!-- Algorithmen anzeigen -->
+<!-- Display algorithms -->
 <AlgorithmGrid Algorithms="selectedAlgorithms" />
 
 <!-- Showing algorithms with missing data points-->
@@ -144,7 +144,7 @@
                     <ul class="mb-0">
                         @foreach (var dp in selectedMissingDataPoints)
                         {
-                        <li>@dp.DataPointName</li>
+                            <li>@dp.DataPointName</li>
                         }
                     </ul>
                 </div>
@@ -161,7 +161,7 @@
 }
 
 
-<NavLink class="btn btn-primary" href="/createAlgorithm">Creating new algorithm</NavLink>
+@* <NavLink class="btn btn-primary" href="/createAlgorithm">Creating new algorithm</NavLink> *@
 
 @code {
     private string _searchTerm = "";
