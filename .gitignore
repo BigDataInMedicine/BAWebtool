@@ -8,3 +8,6 @@ obj/
 *.db-shm
 *.db-wal
 .gitignore
+.idea/
+wwwroot/img/
+wwwroot/uploads/
