@@ -9,5 +9,5 @@ obj/
 *.db-wal
 .gitignore
 .idea/
-wwwroot/img/
-wwwroot/uploads/
+node_modules/
+
